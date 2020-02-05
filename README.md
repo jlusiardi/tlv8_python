@@ -1,4 +1,4 @@
-# Type-Length-Value8 (TLV8) for python
+# Type-Length-Value8 (TLV8) for python [![Build Status](https://travis-ci.org/jlusiardi/tlv8_python.svg?branch=master)](https://travis-ci.org/jlusiardi/tlv8_python) 
 
 Type-Length-Value (TLV) are used to encode arbitrary data. In this case the type and length are represented by 1 byte each. Hence the name TLV8.
 
