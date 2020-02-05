@@ -24,7 +24,9 @@ setuptools.setup(
     name='tlv8',
     packages=setuptools.find_packages(exclude=['tests']),
     version='0.1.0',
-    description='DESCRIPTION',
+    description='Python module to handle type-length-value (TLV) encoded data 8-bit type, 8-bit length, and N-byte '
+                'value as described within the Apple HomeKit Accessory Protocol Specification Non-Commercial Version '
+                'Release R2.',
     author='Joachim Lusiardi',
     author_email='pypi@lusiardi.de',
     url='https://github.com/jlusiardi/tlv8_python',
