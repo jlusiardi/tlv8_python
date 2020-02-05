@@ -17,4 +17,4 @@ before_install:
 
 script:
     - flake8 tlv8
-    - coverage run -m pytest tests/
+    - coverage3 run --branch -m unittest -v
