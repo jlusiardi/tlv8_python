@@ -249,6 +249,8 @@ class Entry:
         data_type = self.data_type
         if data_type == DataType.AUTODETECT:
             # detect the data type
+            if isinstance(self.data, bytearray):
+                data_type = DataType.BYTES
             if isinstance(self.data, bytes):
                 data_type = DataType.BYTES
             if isinstance(self.data, float):

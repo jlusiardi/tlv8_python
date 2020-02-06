@@ -240,4 +240,12 @@ class TestTLV8(unittest.TestCase):
         self.assertEqual(b'\x01\x01@', result)
 
     def test_encode_non_encodable(self):
-        self.assertRaises(ValueError, tlv8.encode, [tlv8.Entry(1, {1:2})])
+        self.assertRaises(ValueError, tlv8.encode, [tlv8.Entry(1, {1: 2})])
+
+    def test_encode_bytearray_autodetect(self):
+        result = tlv8.encode([tlv8.Entry(1, bytearray(b'\x01'))])
+        self.assertEqual(b'\x01\x01\x01', result)
+
+    def test_encode_bytearray(self):
+        result = tlv8.encode([tlv8.Entry(1, bytearray(b'\x01'), tlv8.DataType.BYTES)])
+        self.assertEqual(b'\x01\x01\x01', result)

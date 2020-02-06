@@ -230,7 +230,45 @@ b'\x01\x04%\x06I@\x02\x0e\x03\x05hello\x04\x05world\x01\x01\x02'
 
 ### function `decode`
 
+Function to decode a `bytes` instance into a list of `tlv8.Entry` instances. This reverses the process done by the `encode` function.
 
+The parameters are:
+
+ * `data`: a `bytes`instance to be parsed
+ * `expected`: a dict of type ids onto expected `tlv8.DataType` values. If the expected entry is again a `tlv8.Entry` that should be parsed, use another dict to describe the hiearchical structure. This defaults to `None` which means not filtering will be performed but also no interpretation of the entries is done. This means they will be returned as `bytes` sequence.
+ * `strict_mode`: This defaults to `False`. If set to `True`, this will raise additional `ValueError` instances if there are possible missing separators between entries of the same type.
+
+The function returns a `list` instance and raises `ValueError` instances if the input is either not a `bytes` object or an invalid tlv8 structure.
+
+Example:
+````python
+import tlv8
+
+data = b'\x01\x04%\x06I@\x02\x0e\x03\x05hello\x04\x05world\x03\x01\x02'
+
+structure = {
+        1: tlv8.DataType.FLOAT,
+        2: {
+            3: tlv8.DataType.STRING,
+            4: tlv8.DataType.STRING
+        },
+        3: tlv8.DataType.INTEGER
+    }
+
+print(tlv8.decode(data, structure))
+```
+
+This will result in:
+```text
+[
+  <1, 3.1410000324249268>,
+  <2, [
+    <3, hello>,
+    <4, world>,
+  ]>,
+  <3, 2>,
+]
+```
 
 ### class `DataType`
 
@@ -238,11 +276,11 @@ This enumeration is used to represent the data type of a `tlv8.Entry`.
 
 Enumeration Entry | TLV8 type | Python type
 ---               | ---       | ---
-BYTES             | bytes     | bytes
+BYTES             | bytes     | `bytes`, also `bytearray` for encoding
 TLV8              | tlv8      | custom class `tlv8.Entry` for encoding and `dict` for the expected structure during decoding
-INTEGER           | integer   | int
-FLOAT             | float     | float
-STRING            | string    | str
+INTEGER           | integer   | `int`
+FLOAT             | float     | `float`
+STRING            | string    | `str`
 AUTODETECT        | n/a       | this is used declare that a data type is not preset but will be determined by the python type of the data
 
 
