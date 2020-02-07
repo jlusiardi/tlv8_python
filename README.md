@@ -255,7 +255,7 @@ The parameters are:
 The function returns a `list` instance and raises `ValueError` instances if the input is either not a `bytes` object or an invalid tlv8 structure.
 
 Example:
-````python
+```python
 import tlv8
 
 data = b'\x01\x04%\x06I@\x02\x0e\x03\x05hello\x04\x05world\x03\x01\x02'
