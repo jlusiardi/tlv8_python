@@ -139,7 +139,21 @@ This will result in:
 #### decode nested data
 
 ```python
- ```
+import tlv8
+
+in_data = b'\x01\x06\x03\x01\n\x04\x01\n\x02\x06\x03\x01\x1e\x04\x01('
+sub_struct = {
+    3: tlv8.DataType.INTEGER,
+    4: tlv8.DataType.INTEGER
+}
+expected_structure = {
+    1: sub_struct,
+    2: sub_struct
+}
+result = tlv8.decode(in_data, expected_structure)
+
+print(tlv8.format_string(result))
+```
 
 This will result in:
 ```text
