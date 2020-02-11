@@ -1,3 +1,5 @@
 coverage
 pytest
 flake8
+twine
+
