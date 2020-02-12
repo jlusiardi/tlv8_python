@@ -39,6 +39,11 @@ class TestTLV8Decode(unittest.TestCase):
         result = tlv8.decode(input_data)
         self.assertEqual([tlv8.Entry(2, b'\x23')], result)
 
+    def test_decode_single_entry_bytearry(self):
+        input_data = bytearray(b'\x02\x01\x23')
+        result = tlv8.decode(input_data)
+        self.assertEqual([tlv8.Entry(2, b'\x23')], result)
+
     def test_decode_2_entries(self):
         input_data = b'\x02\x01\x23\x03\x01\x42'
         result = tlv8.decode(input_data)

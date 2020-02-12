@@ -244,11 +244,11 @@ b'\x01\x04%\x06I@\x02\x0e\x03\x05hello\x04\x05world\x01\x01\x02'
 
 ### function `decode`
 
-Function to decode a `bytes` instance into a list of `tlv8.Entry` instances. This reverses the process done by the `encode` function.
+Function to decode a `bytes` or `bytearray` instance into a list of `tlv8.Entry` instances. This reverses the process done by the `encode` function.
 
 The parameters are:
 
- * `data`: a `bytes`instance to be parsed
+ * `data`: a `bytes` or `bytearray` instance to be parsed
  * `expected`: a dict of type ids onto expected `tlv8.DataType` values. If the expected entry is again a `tlv8.Entry` that should be parsed, use another dict to describe the hiearchical structure. This defaults to `None` which means not filtering will be performed but also no interpretation of the entries is done. This means they will be returned as `bytes` sequence.
  * `strict_mode`: This defaults to `False`. If set to `True`, this will raise additional `ValueError` instances if there are possible missing separators between entries of the same type.
 
