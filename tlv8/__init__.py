@@ -99,11 +99,11 @@ def encode(entries: list, separator_type_id=0xff) -> bytes:
     return result
 
 
-def decode(data: bytes, expected=None, strict_mode=False) -> list:
+def decode(data, expected=None, strict_mode=False) -> list:
     """
-    Decodes a sequence of bytes into a list of hierarchical TLV8 Entries.
+    Decodes a sequence of bytes or bytearray into a list of hierarchical TLV8 Entries.
 
-    :param data: a bytes instance.
+    :param data: a bytes or bytearray instance.
     :param expected: a dict of type ids onto expected DataTypes. If an entry is again a TLV8 Entry, use another dict to
          describe the hierarchical structure. This defaults to None which means not filtering will be performed but
          also no interpretation of the entries is done. This means they will be returned bytes sequence.
@@ -111,8 +111,10 @@ def decode(data: bytes, expected=None, strict_mode=False) -> list:
     :return: a list of tlv8.Entry objects
     :raises: ValueError on failures during decoding
     """
+    if isinstance(data, bytearray):
+        data = bytes(data)
     if not isinstance(data, bytes):
-        raise ValueError('data parameter must be bytes')
+        raise ValueError('data parameter must be bytes or bytearray')
     if len(data) == 0:
         # no data, nothing to do
         return []
