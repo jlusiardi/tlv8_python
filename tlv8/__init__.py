@@ -18,7 +18,7 @@ __all__ = [
     'encode', 'format_string', 'decode', 'DataType', 'Entry'
 ]
 
-from enum import IntEnum
+import enum
 from struct import pack, unpack, error
 
 try:
@@ -152,35 +152,56 @@ def decode(data, expected=None, strict_mode=False) -> list:
     if not expected:
         return tmp
 
+    # generate a map between the int values and the potential enums
+    enum_map = {
+        int(x[0]): x[0] for x in expected.items()
+    }
+
+    def decode_int(tlv_entry):
+        """
+        Decode an int value from a tlv entry. This respects the length of the integer. The entry will be updated in
+        place.
+
+        :param tlv_entry: the tlv entry to decode
+        """
+        if tlv_len == 1:
+            tlv_entry.data = unpack('<b', tlv_entry.data)[0]
+        elif tlv_len == 2:
+            tlv_entry.data = unpack('<h', tlv_entry.data)[0]
+        elif tlv_len == 4:
+            tlv_entry.data = unpack('<i', tlv_entry.data)[0]
+        elif tlv_len == 8:
+            tlv_entry.data = unpack('<q', tlv_entry.data)[0]
+        else:
+            raise ValueError('Integer of unknown length: {len}'.format(len=tlv_len))
+
     result = []
     for entry in tmp:
         if entry.type_id in expected:
+            if isinstance(enum_map[entry.type_id], enum.IntEnum):
+                entry.type_id = type(enum_map[entry.type_id])(entry.type_id)
             expected_data_type = expected[entry.type_id]
             entry.data_type = expected_data_type
             tlv_len = len(entry.data)
             if expected_data_type == DataType.INTEGER:
-                if tlv_len == 1:
-                    entry.data = unpack('<b', entry.data)[0]
-                elif tlv_len == 2:
-                    entry.data = unpack('<h', entry.data)[0]
-                elif tlv_len == 4:
-                    entry.data = unpack('<i', entry.data)[0]
-                elif tlv_len == 8:
-                    entry.data = unpack('<q', entry.data)[0]
-                else:
-                    raise ValueError('Integer of unknown length: {len}'.format(len=tlv_len))
-            if expected_data_type == DataType.FLOAT:
+                decode_int(entry)
+            elif expected_data_type == DataType.FLOAT:
                 entry.data = unpack('<f', entry.data)[0]
-            if expected_data_type == DataType.STRING:
+            elif expected_data_type == DataType.STRING:
                 entry.data = entry.data.decode()
-            if type(expected_data_type) == dict:
+            elif expected_data_type == DataType.BYTES:
+                entry.data = entry.data
+            elif isinstance(expected_data_type, dict):
                 entry.data = decode(entry.data, expected_data_type)
+            elif isinstance(expected_data_type, enum.EnumMeta):
+                decode_int(entry)
+                entry.data = expected_data_type(entry.data)
             result.append(entry)
 
     return result
 
 
-class DataType(IntEnum):
+class DataType(enum.IntEnum):
     """
     The various types of data that can be used in the tlv8 context.
     """
@@ -238,8 +259,8 @@ class Entry:
     def __str__(self):
         return '<{t}, {d}>'.format(t=self.type_id, d=self.data)
 
-#    def __repr__(self):
-#        return self.__str__()
+    def __repr__(self):
+        return self.__str__()
 
     def encode(self):
         """
