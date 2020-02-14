@@ -330,7 +330,7 @@ class Entry:
         :param indent: the indent used for the hierarchical structuring of the output
         :return: a str object representing this Entry instance
         """
-        result = '<{i}, '.format(i=self.type_id)
+        result = '<{i!s}, '.format(i=self.type_id)
         if self.data_type == DataType.TLV8 or isinstance(self.data, list):
             result += format_string(self.data, indent)
         else:
