@@ -1,6 +1,12 @@
 
 # Changes
 
+## Version 0.4.0
+
+New Features:
+
+ - Support encoding and decoding `IntEnum` keys and and values
+
 ## Version 0.3.0
 
 New Features:
