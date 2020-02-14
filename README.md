@@ -169,6 +169,72 @@ This will result in:
 ]
 ```
 
+### Using IntEnum data during encoding and decoding
+
+Using enumerations might increase readabilty of encode end decode processes.
+
+### During encoding
+
+It is possible to use `enum.IntEnum` for encoding:
+
+```python
+import tlv8
+import enum
+
+class Keys(enum.IntEnum):
+    X = 42
+    # ...
+
+class Values(enum.IntEnum):
+    Y = 23
+    # ...
+
+result = tlv8.encode([
+    tlv8.Entry(Keys.X, Values.Y)
+])
+
+print(result)
+```
+
+This will result in:
+```text
+b'*\x01\x17'
+```
+
+### During decoding
+
+As during encoding, `enum.IntEnum` can be used for keys and values during decoding:
+
+```python
+import tlv8
+import enum
+
+class Keys(enum.IntEnum):
+    X = 42
+    # ...
+
+class Values(enum.IntEnum):
+    Y = 23
+    # ...
+
+result = tlv8.decode(b'*\x01\x17', {
+    Keys.X: Values
+})
+
+print(tlv8.format_string(result))
+print(type(result[0].type_id), type(result[0].data))
+```
+
+This will result in 
+```text
+[
+  <Keys.X, Values.Y>,
+]
+<enum 'Keys'> <enum 'Values'>
+```
+
+So the `type_id` and the `data` fields are not simple `int` instance anymore but values of their enumerations. This alos helps during using `format_string` to get a easier to read output.
+
 ## Coding
 
 The module offers the following primary functions and classes.
