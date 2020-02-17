@@ -119,3 +119,23 @@ class TestTLV8EntryList(unittest.TestCase):
         ])
         self.assertEqual(el.first_by_id(1), None)
         self.assertEqual(el.first_by_id(2), el[0])
+
+    def test_entrylist_format_string(self):
+        el = tlv8.EntryList([
+            tlv8.Entry(1, 1),
+            tlv8.Entry(2, tlv8.EntryList([
+                tlv8.Entry(4, 4),
+                tlv8.Entry(5, 5)
+            ])),
+            tlv8.Entry(3, 3),
+        ])
+        result = tlv8.format_string(el)
+        expected = """[
+  <1, 1>,
+  <2, [
+    <4, 4>,
+    <5, 5>,
+  ]>,
+  <3, 3>,
+]"""
+        self.assertEqual(result, expected)

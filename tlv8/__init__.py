@@ -425,7 +425,7 @@ class Entry:
         :return: a str object representing this Entry instance
         """
         result = '<{i!s}, '.format(i=self.type_id)
-        if self.data_type == DataType.TLV8 or isinstance(self.data, list):
+        if self.data_type == DataType.TLV8 or isinstance(self.data, list) or isinstance(self.data, EntryList):
             result += format_string(self.data, indent)
         else:
             result += str(self.data)
