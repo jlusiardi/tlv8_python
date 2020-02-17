@@ -96,6 +96,24 @@ class TestTLV8(unittest.TestCase):
         expected_data = data[0].encode() + b'\xff\x00' + data[1].encode()
         self.assertEqual(result, expected_data)
 
+    def test_encode_same_set_sep_type(self):
+        data = [
+                tlv8.Entry(23, b'23', tlv8.DataType.BYTES),
+                tlv8.Entry(23, '23', tlv8.DataType.STRING)
+            ]
+        result = tlv8.encode(data, 0)
+        expected_data = data[0].encode() + b'\x00\x00' + data[1].encode()
+        self.assertEqual(result, expected_data)
+
+    def test_encode_same_set_sep_type_occurs(self):
+        data = [
+                tlv8.Entry(23, '42'),
+                tlv8.Entry(23, '43')
+            ]
+        with self.assertRaises(ValueError) as error_context:
+            tlv8.encode(data, 23)
+        self.assertEqual(str(error_context.exception), 'Separator type id 23 occurs with list of entries!')
+
     def test_encode_3same(self):
         data = [
                 tlv8.Entry(23, b'23', tlv8.DataType.BYTES),

@@ -81,6 +81,14 @@ class TestTLV8EntryList(unittest.TestCase):
         result = el.encode()
         self.assertEqual(b'\x02\x01\x23', result)
 
+    def test_entrylist_encode_same_sep_type(self):
+        el = tlv8.EntryList([
+            tlv8.Entry(2, b'\x23'),
+            tlv8.Entry(2, b'\x42')
+        ])
+        result = el.encode(1)
+        self.assertEqual(b'\x02\x01\x23\x01\x00\x02\x01\x42', result)
+
     def test_entrylist_assert_has(self):
         el = tlv8.EntryList([
             tlv8.Entry(2, b'\x23')

@@ -186,6 +186,8 @@ def encode(entries: list, separator_type_id=0xff) -> bytes:
     for entry in entries:
         if not isinstance(entry, Entry):
             raise ValueError('The parameter entries must only contain elements of type tlv8.Entry')
+        if entry.type_id == separator_type_id:
+            raise ValueError('Separator type id {st} occurs with list of entries!'.format(st=separator_type_id))
         if last_type_id == entry.type_id:
             # must insert separator of two entries of the same type succeed one an other
             result += pack('<B', separator_type_id) + b'\x00'
