@@ -387,3 +387,31 @@ This function is called to encode the data stored in this `Entry`. The data type
 
 This function formats the data stored in this entry as readable string. It is mostly called by `tlv8.format_string()`.
 
+### class `EntryList`
+
+This class represents a list of entries. The class overrides the methods `__repr__`, `__eq__`, `__len__`, `__getitem__` and `__iter__` to fit the needs of the application. 
+
+#### constructor
+
+The constructor takes the following parameters:
+
+ * `data`: if set, this `list` of `tlv8.Entry` instances is used to initialize the `EntryList`.
+
+The constructor raised a `ValueError` if the data is either not a `list` or not a list of `tlv8.Entry` instances.
+
+#### `append(entry)`
+
+Append the `Entry` to the `EntryList`.
+
+#### `assert_has(type_id, message)`
+
+#### `encode(self, separator_type_id)`
+
+#### `by_id(type_id)`
+
+Filters the `EntryList` and returns only `Entry` instance whose `type_id` match the given one. If no `Entry` instances
+were found it returns an empty list.
+
+#### `first_by_id(type_id)`
+
+Search the `EntryList` for the first `Entry` with the given `type_id`. If no such `Entry` was found, it returns `None`.

@@ -22,19 +22,19 @@ import tlv8
 class TestTLV8Entry(unittest.TestCase):
     def test_str_str(self):
         entry1 = tlv8.Entry(1, 'Hallo')
-        self.assertEqual(entry1.__str__(), '<1, Hallo>')
+        self.assertEqual(entry1.__str__(), '<Entry 1, Hallo>')
 
     def test_str_bytes(self):
         entry1 = tlv8.Entry(1, b'23')
-        self.assertEqual(entry1.__str__(), '<1, b\'23\'>')
+        self.assertEqual(entry1.__str__(), '<Entry 1, b\'23\'>')
 
     def test_str_int(self):
         entry1 = tlv8.Entry(1, 23)
-        self.assertEqual(entry1.__str__(), '<1, 23>')
+        self.assertEqual(entry1.__str__(), '<Entry 1, 23>')
 
     def test_str_float(self):
         entry1 = tlv8.Entry(1, 23.42)
-        self.assertEqual(entry1.__str__(), '<1, 23.42>')
+        self.assertEqual(entry1.__str__(), '<Entry 1, 23.42>')
 
     def test_equal_different_types(self):
         entry1 = tlv8.Entry(1, 42)

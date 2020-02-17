@@ -28,10 +28,105 @@ except ImportError:
         return abs(a - b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
 
 
+class EntryList(object):
+    def __init__(self, data=None):
+        """
+        Create a new EntryList instance. It is initialized with the given data
+
+        :param data: this must be a list of Entry instances
+        :raises: ValueError is risen if either data is not a list or not all list entries are Entry instances
+        """
+        if data:
+            if isinstance(data, list):
+                for entry in data:
+                    if not isinstance(entry, Entry):
+                        raise ValueError('Not a valid tlv8.Entry: {e}'.format(e=entry))
+                self.data = data
+            else:
+                raise ValueError('No valid list: {e}'.format(e=data))
+        else:
+            self.data = []
+
+    def append(self, entry):
+        """
+        Appends an tlv8.Entry to this tlv8.EntryList. This works like list.append().
+
+        :param entry: the entry to append
+        :raises: ValueError if the entry to add is no tlv8.Entry
+        """
+        if not isinstance(entry, Entry):
+            raise ValueError('Not an tlv8.Entry: {e}'.format(e=entry))
+        self.data.append(entry)
+
+    def __iter__(self):
+        return self.data.__iter__()
+
+    def __getitem__(self, item):
+        return self.data[item]
+
+    def __len__(self):
+        return self.data.__len__()
+
+    def assert_has(self, type_id, message=''):
+        """
+        Scan this entry list for entries with the given type id. If no entry was found an AssertionError with the given
+        message is raised.
+
+        :param type_id: the type id to check for
+        :param message: the message of the AssertionError if raised
+        :raises: AssertionError if no entry with the type id was found
+        """
+        if self.first_by_id(type_id):
+            return
+        raise AssertionError(message)
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.data == other.data
+        else:
+            return False
+
+    def __repr__(self):
+        return '<EntryList ' + self.data.__repr__() + '>'
+
+    def encode(self, separator_type_id=0xff):
+        """
+        Function to encode this EntryList into a sequence of bytes following the rules for creating TLVs.
+
+        :param separator_type_id: the 8-bit id of the separator to be used in two fields of the same type id are
+            directly after one another in the list. The default is (as defined in table 5-6, page 51 of HomeKit
+            Accessory Protocol Specification Non-Commercial Version Release R2) 0xff.
+        :return: an instance of bytes. if nothing was encoded, it returns an empty instance
+        :raises ValueError: if the input parameter is not conform to a list of tlv8.Entry objects
+        """
+        return encode(self.data, separator_type_id)
+
+    def by_id(self, type_id):
+        """
+        Filters the entry list and returns only those entries whose type is of the given value.
+
+        :param type_id: the type id to look for
+        :return: a EntryList instance containing all found entries, the list may be empty.
+        """
+        return EntryList([entry for entry in self.data if entry.type_id == type_id])
+
+    def first_by_id(self, type_id):
+        """
+        Scan this entry list and return the first entry whose type is of the given value.
+
+        :param type_id: the type id to look for
+        :return: a Entry instance or None, if not a single entry has the searched type id
+        """
+        for entry in self.data:
+            if entry.type_id == type_id:
+                return entry
+        return None
+
+
 def format_string(entries: list, indent=0) -> str:
     """
-    Format a list of TLV8 Entry objects as str instance. The hierarchy of the entries will be represented by
-    increasing the indentation of the output.
+    Format a list of TLV8 Entry objects or a EntryList as str instance. The hierarchy of the entries will be
+    represented by increasing the indentation of the output.
 
     Example:
     ```
@@ -62,8 +157,8 @@ def format_string(entries: list, indent=0) -> str:
     :return: a str instance with the formatted representation of the input
     :raises ValueError: if the input parameter is not conform to a list of tlv8.Entry objects
     """
-    if not isinstance(entries, list):
-        raise ValueError('The parameter entries must be of type list')
+    if not (isinstance(entries, list) or isinstance(entries, EntryList)):
+        raise ValueError('The parameter entries must be of type list or EntryList')
     result = '[\n'
     for entry in entries:
         if not isinstance(entry, Entry):
@@ -99,7 +194,7 @@ def encode(entries: list, separator_type_id=0xff) -> bytes:
     return result
 
 
-def decode(data, expected=None, strict_mode=False) -> list:
+def decode(data, expected=None, strict_mode=False) -> EntryList:
     """
     Decodes a sequence of bytes or bytearray into a list of hierarchical TLV8 Entries.
 
@@ -118,7 +213,7 @@ def decode(data, expected=None, strict_mode=False) -> list:
     if len(data) == 0:
         # no data, nothing to do
         return []
-    tmp = []
+    tmp = EntryList()
     remaining_data = data
     while len(remaining_data) > 0:
         if len(remaining_data) < 2:
@@ -175,7 +270,7 @@ def decode(data, expected=None, strict_mode=False) -> list:
         else:
             raise ValueError('Integer of unknown length: {len}'.format(len=tlv_len))
 
-    result = []
+    result = EntryList()
     for entry in tmp:
         if entry.type_id in expected:
             if isinstance(enum_map[entry.type_id], enum.IntEnum):
@@ -196,6 +291,8 @@ def decode(data, expected=None, strict_mode=False) -> list:
             elif isinstance(expected_data_type, enum.EnumMeta):
                 decode_int(entry)
                 entry.data = expected_data_type(entry.data)
+            else:
+                raise ValueError('Decoding failed, unknown data type: {dt}'.format(dt=expected_data_type))
             result.append(entry)
 
     return result
@@ -257,12 +354,9 @@ class Entry:
             return False
 
     def __str__(self):
-        return '<{t}, {d}>'.format(t=self.type_id, d=self.data)
+        return '<Entry {t}, {d}>'.format(t=self.type_id, d=self.data)
 
-    def __repr__(self):
-        return self.__str__()
-
-    def encode(self):
+    def encode(self, separator_type_id=0xff):
         """
         Encode this TLV8 entry into a sequence of bytes.
 
@@ -289,7 +383,7 @@ class Entry:
         if data_type == DataType.BYTES:
             remaining_data = self.data
         elif data_type == DataType.TLV8:
-            remaining_data = encode(self.data)
+            remaining_data = encode(self.data, separator_type_id)
         elif data_type == DataType.INTEGER:
             for int_format in ['<b', '<h', '<i', '<q']:
                 try:

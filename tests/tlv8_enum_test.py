@@ -35,9 +35,9 @@ class TestTLV8Enum(unittest.TestCase):
         result = tlv8.decode(data, {
             TestKeys.KEY_1: TestValues
         })
-        expected = [
+        expected = tlv8.EntryList([
             tlv8.Entry(TestKeys.KEY_1, TestValues.VALUE_2)
-        ]
+        ])
         self.assertIsInstance(result[0].type_id, TestKeys)
         self.assertIsInstance(result[0].data, TestValues)
         self.assertEqual(expected, result)
@@ -50,9 +50,9 @@ class TestTLV8Enum(unittest.TestCase):
         result = tlv8.decode(data, {
             TestKeys.KEY_1: tlv8.DataType.STRING
         })
-        expected = [
+        expected = tlv8.EntryList([
             tlv8.Entry(TestKeys.KEY_1, 'foo')
-        ]
+        ])
         self.assertIsInstance(result[0].type_id, TestKeys)
         self.assertEqual(expected, result)
 
@@ -64,9 +64,9 @@ class TestTLV8Enum(unittest.TestCase):
         result = tlv8.decode(data, {
             1: TestValues
         })
-        expected = [
+        expected = tlv8.EntryList([
             tlv8.Entry(1, 2)
-        ]
+        ])
         self.assertIsInstance(result[0].data, TestValues)
         self.assertEqual(expected, result)
 
