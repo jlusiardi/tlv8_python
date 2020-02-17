@@ -286,7 +286,7 @@ The parameters are:
  * `entries`: a list of `tlv8.Entry` objects
  * `separator_type_id`: the 8-bit type id of the separator to be used. The default is (as defined in table 5-6, page 51 of HomeKit Accessory Protocol Specification Non-Commercial Version Release R2) 0xff.
 
-The function returns an instance of `bytes`. This is empty if nothing was encoded. The function raises `ValueError` if the input parameter is not a list of `tlv8.Entry` objects or a data value is not encodable.
+The function returns an instance of `bytes`. This is empty if nothing was encoded. The function raises `ValueError` if the input parameter is not a list of `tlv8.Entry` objects or a data value is not encodable. A `ValueError` will also be raised if the `separator_type_id` is used as `type_id` in one of the entries as well.
 
 Example:
 ```python
@@ -387,3 +387,35 @@ This function is called to encode the data stored in this `Entry`. The data type
 
 This function formats the data stored in this entry as readable string. It is mostly called by `tlv8.format_string()`.
 
+### class `EntryList`
+
+This class represents a list of entries. The class overrides the methods `__repr__`, `__eq__`, `__len__`, `__getitem__` and `__iter__` to fit the needs of the application. 
+
+#### constructor
+
+The constructor takes the following parameters:
+
+ * `data`: if set, this `list` of `tlv8.Entry` instances is used to initialize the `EntryList`.
+
+The constructor raised a `ValueError` if the data is either not a `list` or not a list of `tlv8.Entry` instances.
+
+#### `append(entry)`
+
+Append the `tlv8.Entry` to the `EntryList`. It performs type checks, so only `tlv8.Entry` instances can be appended.
+
+#### `assert_has(type_id, message)`
+
+Looks for a `tlv8.Entry` instance with `type_id` in the first level of the `EntryList`. If none is found, it raises an `AssertionError` with the given `message`. This does not iterate recursivly, because the same type id may have different meanings on different levels (and different contexts).
+
+#### `encode(self, separator_type_id)`
+
+Encodes the `EntryList` using the given separator type id. This relies on `tlv8.encode()`.
+
+#### `by_id(type_id)`
+
+Filters the `EntryList` and returns only `Entry` instance whose `type_id` match the given one. If no `Entry` instances
+were found it returns an empty list.
+
+#### `first_by_id(type_id)`
+
+Search the `EntryList` for the first `Entry` with the given `type_id`. If no such `Entry` was found, it returns `None`.
