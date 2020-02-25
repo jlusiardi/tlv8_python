@@ -24,7 +24,7 @@ class TestTLV8Decode(unittest.TestCase):
     def test_zero_input(self):
         input_data = b''
         result = tlv8.decode(input_data)
-        self.assertEqual([], result)
+        self.assertEqual(tlv8.EntryList(), result)
 
     def test_input_to_short_1(self):
         input_data = b'\x01'

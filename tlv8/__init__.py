@@ -212,10 +212,10 @@ def decode(data, expected=None, strict_mode=False) -> EntryList:
         data = bytes(data)
     if not isinstance(data, bytes):
         raise ValueError('data parameter must be bytes or bytearray')
+    tmp = EntryList()
     if len(data) == 0:
         # no data, nothing to do
-        return []
-    tmp = EntryList()
+        return tmp
     remaining_data = data
     while len(remaining_data) > 0:
         if len(remaining_data) < 2:
