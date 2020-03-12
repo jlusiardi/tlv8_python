@@ -196,6 +196,54 @@ def encode(entries: list, separator_type_id=0xff) -> bytes:
     return result
 
 
+def deep_decode(data, strict_mode=False) -> EntryList:
+    if isinstance(data, bytearray):
+        data = bytes(data)
+    if not isinstance(data, bytes):
+        raise ValueError('data parameter must be bytes or bytearray not {}'.format(type(data)))
+    if len(data) == 0:
+        # no data, nothing to do
+        return EntryList()
+    tmp = EntryList()
+    remaining_data = data
+    while len(remaining_data) > 0:
+        if len(remaining_data) < 2:
+            # the shortest encoded TLV8 is 3 bytes, we got less, so raise an error
+            raise ValueError('Bytes with length {len} is not a valid TLV8.'.format(len=len(data)))
+
+        tlv_id = unpack('<B', remaining_data[0:1])[0]
+        tlv_len = unpack('<B', remaining_data[1:2])[0]
+        if len(remaining_data[2:]) < tlv_len:
+            # the remaining data is less than the encoded length
+            raise ValueError('Not enough data left. {} vs {}'.format(len(remaining_data[2:]), tlv_len))
+        tlv_data = remaining_data[2:2 + tlv_len]
+        if len(tmp) > 0 and tmp[-1].type_id == tlv_id:
+            # we have the same type id so we expect the size of the data so far to be 0 mod 255
+            if len(tmp[-1].data) % 255 != 0:
+                # it there was no max size fragment before, this is either
+                if strict_mode:
+                    # an error in strict mode
+                    raise ValueError('Missing separator detected.')
+                else:
+                    # or we let it pass as a second instance of the type id. both could be wrong
+                    tmp.append(Entry(tlv_id, tlv_data))
+            else:
+                # max size fragments are added the new data
+                tmp[-1].data += tlv_data
+        else:
+            tmp.append(Entry(tlv_id, tlv_data))
+        remaining_data = remaining_data[2 + tlv_len:]
+
+
+    for entry in tmp:
+        try:
+            r = deep_decode(entry.data)
+            entry.data = r
+        except:
+            pass
+    return tmp
+
+
 def decode(data, expected=None, strict_mode=False) -> EntryList:
     """
     Decodes a sequence of bytes or bytearray into a list of hierarchical TLV8 Entries.
