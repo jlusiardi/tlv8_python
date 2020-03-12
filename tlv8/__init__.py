@@ -234,12 +234,11 @@ def deep_decode(data, strict_mode=False) -> EntryList:
             tmp.append(Entry(tlv_id, tlv_data))
         remaining_data = remaining_data[2 + tlv_len:]
 
-
     for entry in tmp:
         try:
             r = deep_decode(entry.data)
             entry.data = r
-        except:
+        except Exception:
             pass
     return tmp
 
