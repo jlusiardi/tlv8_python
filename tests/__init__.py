@@ -15,7 +15,7 @@
 #
 
 __all__ = [
-    'TestTLV8', 'TestTLV8Decode', 'TestTLV8Entry', 'TestTLV8Enum', 'TestTLV8EntryList'
+    'TestTLV8', 'TestTLV8Decode', 'TestTLV8Entry', 'TestTLV8Enum', 'TestTLV8EntryList', 'TestTLV8DeepDecode'
 ]
 
 from tests.tlv8_encode_tests import TestTLV8

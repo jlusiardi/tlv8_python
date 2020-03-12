@@ -196,7 +196,7 @@ def encode(entries: list, separator_type_id=0xff) -> bytes:
     return result
 
 
-def deep_decode(data, strict_mode=False) -> EntryList:
+def _internal_decode(data, strict_mode=False) -> EntryList:
     if isinstance(data, bytearray):
         data = bytes(data)
     if not isinstance(data, bytes):
@@ -233,7 +233,21 @@ def deep_decode(data, strict_mode=False) -> EntryList:
         else:
             tmp.append(Entry(tlv_id, tlv_data))
         remaining_data = remaining_data[2 + tlv_len:]
+    return tmp
 
+
+def deep_decode(data, strict_mode=False) -> EntryList:
+    """
+    Decodes a sequence of bytes or bytearray into a list of hierarchical TLV8 Entries. This is done recursivly
+    and does not consider any typing.
+
+    :param data: a bytes or bytearray instance.
+    :param strict_mode: if set to True, bail out if there consecutive entry of the same type without separators.
+    :return: a list of tlv8.Entry objects
+    :raises: ValueError on failures during decoding
+    """
+
+    tmp = _internal_decode(data, strict_mode)
     for entry in tmp:
         try:
             r = deep_decode(entry.data)
@@ -255,42 +269,7 @@ def decode(data, expected=None, strict_mode=False) -> EntryList:
     :return: a list of tlv8.Entry objects
     :raises: ValueError on failures during decoding
     """
-    if isinstance(data, bytearray):
-        data = bytes(data)
-    if not isinstance(data, bytes):
-        raise ValueError('data parameter must be bytes or bytearray')
-    tmp = EntryList()
-    if len(data) == 0:
-        # no data, nothing to do
-        return tmp
-    remaining_data = data
-    while len(remaining_data) > 0:
-        if len(remaining_data) < 2:
-            # the shortest encoded TLV8 is 3 bytes, we got less, so raise an error
-            raise ValueError('Bytes with length {len} is not a valid TLV8.'.format(len=len(data)))
-
-        tlv_id = unpack('<B', remaining_data[0:1])[0]
-        tlv_len = unpack('<B', remaining_data[1:2])[0]
-        if len(remaining_data[2:]) < tlv_len:
-            # the remaining data is less than the encoded length
-            raise ValueError('Not enough data left.')
-        tlv_data = remaining_data[2:2 + tlv_len]
-        if len(tmp) > 0 and tmp[-1].type_id == tlv_id:
-            # we have the same type id so we expect the size of the data so far to be 0 mod 255
-            if len(tmp[-1].data) % 255 != 0:
-                # it there was no max size fragment before, this is either
-                if strict_mode:
-                    # an error in strict mode
-                    raise ValueError('Missing separator detected.')
-                else:
-                    # or we let it pass as a second instance of the type id. both could be wrong
-                    tmp.append(Entry(tlv_id, tlv_data))
-            else:
-                # max size fragments are added the new data
-                tmp[-1].data += tlv_data
-        else:
-            tmp.append(Entry(tlv_id, tlv_data))
-        remaining_data = remaining_data[2 + tlv_len:]
+    tmp = _internal_decode(data, strict_mode)
 
     # if we do not know what is expected, we just return the unfiltered, uninterpreted but parsed list of entries
     if not expected:
