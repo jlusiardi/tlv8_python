@@ -254,3 +254,18 @@ class TestTLV8DeepDecode(unittest.TestCase):
             tlv8.Entry(1, b'Hi')
         ])
         self.assertEqual(result, expected_data)
+
+    def test_decode_misinterpretation(self):
+        """This show how data may be misinterpreted by deep_decode"""
+        data = tlv8.encode([
+            tlv8.Entry(1, 16843330),
+            tlv8.Entry(2, b'\x01')
+        ])
+        result = tlv8.deep_decode(data)
+        expected_data = tlv8.EntryList([
+            tlv8.Entry(1, tlv8.EntryList([
+                tlv8.Entry(66, b'\x01\x01')
+            ])),
+            tlv8.Entry(2, b'\x01')
+        ])
+        self.assertEqual(result, expected_data)
