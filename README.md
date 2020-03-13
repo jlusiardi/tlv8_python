@@ -350,6 +350,62 @@ This will result in:
 ]
 ```
 
+### function `deep_decode`
+
+This function works like the `decode` function but tries to do it recursively. That means it decodes the first level of
+a TLV8 structure first, then looks at each entry and tries to decode that as well. This is mostly meant for debugging
+purposes in combination with `format_string`.
+
+Example:
+```python
+import tlv8
+
+data = b'\x01\x01\x23\x02\x03\x04\x01\x42\x01\x01\x23'
+print(tlv8.deep_decode(data))
+
+```
+
+This will result in:
+```text
+[
+  <1, b'#'>,
+  <2, [
+    <4, b'B'>,
+  ]>,
+  <1, b'#'>,
+]
+
+```
+
+**Notice**:
+
+This function might misinterpret data as TLV8 data. For example
+
+```python
+import tlv8
+
+data = tlv8.encode([
+    tlv8.Entry(1, 16843330),
+    tlv8.Entry(2, b'\x01')
+])
+
+# here data is b'\x01\x04B\x02\x01\x01\x02\x01\x01'
+
+print(tlv8.deep_decode(data))
+```
+
+This will result in a misinterpretation of the entry with ID 1:
+```text
+[
+  <1, [
+    <66, b'\x01\x01'>,
+  ]>,
+  <2, b'\x01'>,
+]
+```
+
+
+
 ### class `DataType`
 
 This enumeration is used to represent the data type of a `tlv8.Entry`. 

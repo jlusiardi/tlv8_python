@@ -1,6 +1,12 @@
 
 # Changes
 
+## Version 0.6.0
+
+New Features:
+
+ - Add function `tlv8.deep_decode` to get a quick view over a TLV structure.
+
 ## Version 0.5.0
 
 New Features:

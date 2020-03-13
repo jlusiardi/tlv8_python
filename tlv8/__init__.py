@@ -196,26 +196,15 @@ def encode(entries: list, separator_type_id=0xff) -> bytes:
     return result
 
 
-def decode(data, expected=None, strict_mode=False) -> EntryList:
-    """
-    Decodes a sequence of bytes or bytearray into a list of hierarchical TLV8 Entries.
-
-    :param data: a bytes or bytearray instance.
-    :param expected: a dict of type ids onto expected DataTypes. If an entry is again a TLV8 Entry, use another dict to
-         describe the hierarchical structure. This defaults to None which means not filtering will be performed but
-         also no interpretation of the entries is done. This means they will be returned bytes sequence.
-    :param strict_mode: if set to True, bail out if there consecutive entry of the same type without separators.
-    :return: a list of tlv8.Entry objects
-    :raises: ValueError on failures during decoding
-    """
+def _internal_decode(data, strict_mode=False) -> EntryList:
     if isinstance(data, bytearray):
         data = bytes(data)
     if not isinstance(data, bytes):
-        raise ValueError('data parameter must be bytes or bytearray')
-    tmp = EntryList()
+        raise ValueError('data parameter must be bytes or bytearray not {}'.format(type(data)))
     if len(data) == 0:
         # no data, nothing to do
-        return tmp
+        return EntryList()
+    tmp = EntryList()
     remaining_data = data
     while len(remaining_data) > 0:
         if len(remaining_data) < 2:
@@ -226,7 +215,7 @@ def decode(data, expected=None, strict_mode=False) -> EntryList:
         tlv_len = unpack('<B', remaining_data[1:2])[0]
         if len(remaining_data[2:]) < tlv_len:
             # the remaining data is less than the encoded length
-            raise ValueError('Not enough data left.')
+            raise ValueError('Not enough data left. {} vs {}'.format(len(remaining_data[2:]), tlv_len))
         tlv_data = remaining_data[2:2 + tlv_len]
         if len(tmp) > 0 and tmp[-1].type_id == tlv_id:
             # we have the same type id so we expect the size of the data so far to be 0 mod 255
@@ -244,6 +233,43 @@ def decode(data, expected=None, strict_mode=False) -> EntryList:
         else:
             tmp.append(Entry(tlv_id, tlv_data))
         remaining_data = remaining_data[2 + tlv_len:]
+    return tmp
+
+
+def deep_decode(data, strict_mode=False) -> EntryList:
+    """
+    Decodes a sequence of bytes or bytearray into a list of hierarchical TLV8 Entries. This is done recursivly
+    and does not consider any typing.
+
+    :param data: a bytes or bytearray instance.
+    :param strict_mode: if set to True, bail out if there consecutive entry of the same type without separators.
+    :return: a list of tlv8.Entry objects
+    :raises: ValueError on failures during decoding
+    """
+
+    tmp = _internal_decode(data, strict_mode)
+    for entry in tmp:
+        try:
+            r = deep_decode(entry.data)
+            entry.data = r
+        except Exception:
+            pass
+    return tmp
+
+
+def decode(data, expected=None, strict_mode=False) -> EntryList:
+    """
+    Decodes a sequence of bytes or bytearray into a list of hierarchical TLV8 Entries.
+
+    :param data: a bytes or bytearray instance.
+    :param expected: a dict of type ids onto expected DataTypes. If an entry is again a TLV8 Entry, use another dict to
+         describe the hierarchical structure. This defaults to None which means not filtering will be performed but
+         also no interpretation of the entries is done. This means they will be returned bytes sequence.
+    :param strict_mode: if set to True, bail out if there consecutive entry of the same type without separators.
+    :return: a list of tlv8.Entry objects
+    :raises: ValueError on failures during decoding
+    """
+    tmp = _internal_decode(data, strict_mode)
 
     # if we do not know what is expected, we just return the unfiltered, uninterpreted but parsed list of entries
     if not expected:
