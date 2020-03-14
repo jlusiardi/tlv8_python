@@ -86,59 +86,6 @@ class TestTLV8Decode(unittest.TestCase):
         ])
         self.assertEqual(expected, result)
 
-    def test_decode_int1(self):
-        input_data = b'\x01\x01' + pack('<b', -123)
-        structure = {
-            1: tlv8.DataType.INTEGER,
-        }
-        result = tlv8.decode(input_data, structure)
-        expected = tlv8.EntryList([
-            tlv8.Entry(1, -123),
-        ])
-        self.assertEqual(expected, result)
-
-    def test_decode_int2(self):
-        input_data = b'\x01\x02' + pack('<h', 12345)
-        structure = {
-            1: tlv8.DataType.INTEGER,
-        }
-        result = tlv8.decode(input_data, structure)
-        expected = tlv8.EntryList([
-            tlv8.Entry(1, 12345),
-        ])
-        self.assertEqual(expected, result)
-
-    def test_decode_int3(self):
-        input_data = b'\x01\x03' + pack('<i', 12345)
-        structure = {
-            1: tlv8.DataType.INTEGER,
-        }
-        self.assertRaises(ValueError, tlv8.decode, input_data, structure)
-
-    def test_decode_int4(self):
-        input_data = b'\x01\x08' + pack('<q', 4611686018427387904)
-        structure = {
-            1: tlv8.DataType.INTEGER,
-        }
-        result = tlv8.decode(input_data, structure)
-
-        expected = tlv8.EntryList([
-            tlv8.Entry(1, 4611686018427387904),
-        ])
-        self.assertEqual(expected, result)
-
-    def test_decode_int8(self):
-        input_data = b'\x01\x04' + pack('<i', 12345)
-        structure = {
-            1: tlv8.DataType.INTEGER,
-        }
-        result = tlv8.decode(input_data, structure)
-
-        expected = tlv8.EntryList([
-            tlv8.Entry(1, 12345),
-        ])
-        self.assertEqual(expected, result)
-
     def test_decode_example_2(self):
         input_data = b'\x01\x01\x00'
         structure = {

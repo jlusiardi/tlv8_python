@@ -71,9 +71,9 @@ class TestTLV8(unittest.TestCase):
 
     def test_encode_different(self):
         data = [
-                tlv8.Entry(23, b'23', tlv8.DataType.BYTES),
-                tlv8.Entry(22, '23', tlv8.DataType.STRING)
-            ]
+            tlv8.Entry(23, b'23', tlv8.DataType.BYTES),
+            tlv8.Entry(22, '23', tlv8.DataType.STRING)
+        ]
         result = tlv8.encode(data)
         expected_data = data[0].encode() + data[1].encode()
         self.assertEqual(result, expected_data)
@@ -89,37 +89,37 @@ class TestTLV8(unittest.TestCase):
 
     def test_encode_same(self):
         data = [
-                tlv8.Entry(23, b'23', tlv8.DataType.BYTES),
-                tlv8.Entry(23, '23', tlv8.DataType.STRING)
-            ]
+            tlv8.Entry(23, b'23', tlv8.DataType.BYTES),
+            tlv8.Entry(23, '23', tlv8.DataType.STRING)
+        ]
         result = tlv8.encode(data)
         expected_data = data[0].encode() + b'\xff\x00' + data[1].encode()
         self.assertEqual(result, expected_data)
 
     def test_encode_same_set_sep_type(self):
         data = [
-                tlv8.Entry(23, b'23', tlv8.DataType.BYTES),
-                tlv8.Entry(23, '23', tlv8.DataType.STRING)
-            ]
+            tlv8.Entry(23, b'23', tlv8.DataType.BYTES),
+            tlv8.Entry(23, '23', tlv8.DataType.STRING)
+        ]
         result = tlv8.encode(data, 0)
         expected_data = data[0].encode() + b'\x00\x00' + data[1].encode()
         self.assertEqual(result, expected_data)
 
     def test_encode_same_set_sep_type_occurs(self):
         data = [
-                tlv8.Entry(23, '42'),
-                tlv8.Entry(23, '43')
-            ]
+            tlv8.Entry(23, '42'),
+            tlv8.Entry(23, '43')
+        ]
         with self.assertRaises(ValueError) as error_context:
             tlv8.encode(data, 23)
         self.assertEqual(str(error_context.exception), 'Separator type id 23 occurs with list of entries!')
 
     def test_encode_3same(self):
         data = [
-                tlv8.Entry(23, b'23', tlv8.DataType.BYTES),
-                tlv8.Entry(23, '23', tlv8.DataType.STRING),
-                tlv8.Entry(23, '23', tlv8.DataType.STRING)
-            ]
+            tlv8.Entry(23, b'23', tlv8.DataType.BYTES),
+            tlv8.Entry(23, '23', tlv8.DataType.STRING),
+            tlv8.Entry(23, '23', tlv8.DataType.STRING)
+        ]
         result = tlv8.encode(data)
         expected_data = \
             data[0].encode() + b'\xff\x00' + \
@@ -141,22 +141,22 @@ class TestTLV8(unittest.TestCase):
 
     def test_encode_supported_video_stream_configuration(self):
         data = [
-            tlv8.Entry(1, [         # video codec config
-                tlv8.Entry(1, 0),   # h.264
-                tlv8.Entry(2, [     # video codec param
-                    tlv8.Entry(1, 0),   # Constrained Baseline Profile
-                    tlv8.Entry(2, 0),   # Level 3.1
-                    tlv8.Entry(3, 0),   # Packetization mode: Non-interleaved mode
-                    tlv8.Entry(4, 1),   # CVO not enabled
+            tlv8.Entry(1, [  # video codec config
+                tlv8.Entry(1, 0),  # h.264
+                tlv8.Entry(2, [  # video codec param
+                    tlv8.Entry(1, 0),  # Constrained Baseline Profile
+                    tlv8.Entry(2, 0),  # Level 3.1
+                    tlv8.Entry(3, 0),  # Packetization mode: Non-interleaved mode
+                    tlv8.Entry(4, 1),  # CVO not enabled
                     tlv8.Entry(5, 10),  # CVO ID
                 ]),
-                tlv8.Entry(3, [     # video attributes
-                    tlv8.Entry(1, 1280),    # width
+                tlv8.Entry(3, [  # video attributes
+                    tlv8.Entry(1, 1280),  # width
                     tlv8.Entry(2, 800),  # height
                     tlv8.Entry(3, 30)  # fps
                 ]),
-                tlv8.Entry(3, [     # video attributes
-                    tlv8.Entry(1, 640),     # width
+                tlv8.Entry(3, [  # video attributes
+                    tlv8.Entry(1, 640),  # width
                     tlv8.Entry(2, 480),  # height
                     tlv8.Entry(3, 30)  # fps
                 ])
@@ -184,39 +184,39 @@ class TestTLV8(unittest.TestCase):
         result = tlv8.encode(data)
         expected_data = \
             b'\x01\x30' \
-                b'\x01\x01\x00' \
-                b'\x02\x0f' \
-                    b'\x01\x01\x00' \
-                    b'\x02\x01\x00' \
-                    b'\x03\x01\x00' \
-                    b'\x04\x01\x01' \
-                    b'\x05\x01\n' \
-                b'\x03\x0b' \
-                    b'\x01\x02\x00\x05' \
-                    b'\x02\x02 \x03' \
-                    b'\x03\x01\x1e' \
-                b'\xff\x00' \
-                b'\x03\x0b' \
-                    b'\x01\x02\x80\x02' \
-                    b'\x02\x02\xe0\x01' \
-                    b'\x03\x01\x1e' \
+            b'\x01\x01\x00' \
+            b'\x02\x0f' \
+            b'\x01\x01\x00' \
+            b'\x02\x01\x00' \
+            b'\x03\x01\x00' \
+            b'\x04\x01\x01' \
+            b'\x05\x01\n' \
+            b'\x03\x0b' \
+            b'\x01\x02\x00\x05' \
+            b'\x02\x02 \x03' \
+            b'\x03\x01\x1e' \
+            b'\xff\x00' \
+            b'\x03\x0b' \
+            b'\x01\x02\x80\x02' \
+            b'\x02\x02\xe0\x01' \
+            b'\x03\x01\x1e' \
             b'\xff\x00' \
             b'\x01\x2d' \
-                b'\x01\x01\x00' \
-                b'\x02\x0c' \
-                    b'\x01\x01\x00' \
-                    b'\x02\x01\x00' \
-                    b'\x03\x01\x00' \
-                    b'\x04\x01\x00' \
-                b'\x03\x0b' \
-                    b'\x01\x02\x00\x05' \
-                    b'\x02\x02 \x03' \
-                    b'\x03\x01\x1e' \
-                b'\xff\x00' \
-                b'\x03\x0b' \
-                    b'\x01\x02\x80\x02' \
-                    b'\x02\x02\xe0\x01' \
-                    b'\x03\x01\x1e'
+            b'\x01\x01\x00' \
+            b'\x02\x0c' \
+            b'\x01\x01\x00' \
+            b'\x02\x01\x00' \
+            b'\x03\x01\x00' \
+            b'\x04\x01\x00' \
+            b'\x03\x0b' \
+            b'\x01\x02\x00\x05' \
+            b'\x02\x02 \x03' \
+            b'\x03\x01\x1e' \
+            b'\xff\x00' \
+            b'\x03\x0b' \
+            b'\x01\x02\x80\x02' \
+            b'\x02\x02\xe0\x01' \
+            b'\x03\x01\x1e'
         self.assertEqual(result, expected_data)
 
     def test_autodetection_of_types(self):
@@ -239,7 +239,12 @@ class TestTLV8(unittest.TestCase):
         self.assertRaises(ValueError, tlv8.encode, [1])
 
     def test_encode_128bit_int(self):
-        self.assertRaises(ValueError, tlv8.encode, [tlv8.Entry(1, 85070591730234615865843651857942052864)])
+        self.assertRaises(ValueError, tlv8.encode,
+                          [tlv8.Entry(1, 85070591730234615865843651857942052864, tlv8.DataType.UNSIGNED_INTEGER)])
+
+    def test_encode_128bit_signed_int(self):
+        self.assertRaises(ValueError, tlv8.encode,
+                          [tlv8.Entry(1, -85070591730234615865843651857942052864, tlv8.DataType.INTEGER)])
 
     def test_encode_64bit_int(self):
         result = tlv8.encode([tlv8.Entry(1, 4611686018427387904)])
@@ -253,8 +258,12 @@ class TestTLV8(unittest.TestCase):
         result = tlv8.encode([tlv8.Entry(1, 16384)])
         self.assertEqual(b'\x01\x02\x00@', result)
 
-    def test_encode_8bit_int(self):
-        result = tlv8.encode([tlv8.Entry(1, 64)])
+    def test_encode_8bit_signed_int(self):
+        result = tlv8.encode([tlv8.Entry(1, -64, tlv8.DataType.INTEGER)])
+        self.assertEqual(b'\x01\x01\xc0', result)
+
+    def test_encode_8bit_unsigned_int(self):
+        result = tlv8.encode([tlv8.Entry(1, 64, tlv8.DataType.UNSIGNED_INTEGER)])
         self.assertEqual(b'\x01\x01@', result)
 
     def test_encode_non_encodable(self):
