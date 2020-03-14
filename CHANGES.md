@@ -1,6 +1,14 @@
 
 # Changes
 
+## Version 0.7.0
+
+New Features:
+
+ - Add data type `tlv8.DataType.UNSIGNED_INTEGER` to make a distinction between the default of 
+   signed integers and unsigned integer. This is important for read network ports from TLV 
+   structures
+
 ## Version 0.6.0
 
 New Features:
