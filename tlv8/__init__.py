@@ -296,7 +296,25 @@ def decode(data, expected=None, strict_mode=False) -> EntryList:
         elif tlv_len == 8:
             tlv_entry.data = unpack('<q', tlv_entry.data)[0]
         else:
-            raise ValueError('Integer of unknown length: {len}'.format(len=tlv_len))
+            raise ValueError('Signed integer of unknown length: {len}'.format(len=tlv_len))
+
+    def decode_unsigned_int(tlv_entry):
+        """
+        Decode an int value from a tlv entry. This respects the length of the integer. The entry will be updated in
+        place.
+
+        :param tlv_entry: the tlv entry to decode
+        """
+        if tlv_len == 1:
+            tlv_entry.data = unpack('<B', tlv_entry.data)[0]
+        elif tlv_len == 2:
+            tlv_entry.data = unpack('<H', tlv_entry.data)[0]
+        elif tlv_len == 4:
+            tlv_entry.data = unpack('<I', tlv_entry.data)[0]
+        elif tlv_len == 8:
+            tlv_entry.data = unpack('<Q', tlv_entry.data)[0]
+        else:
+            raise ValueError('Unsigned integer of unknown length: {len}'.format(len=tlv_len))
 
     result = EntryList()
     for entry in tmp:
@@ -308,6 +326,8 @@ def decode(data, expected=None, strict_mode=False) -> EntryList:
             tlv_len = len(entry.data)
             if expected_data_type == DataType.INTEGER:
                 decode_int(entry)
+            elif expected_data_type == DataType.UNSIGNED_INTEGER:
+                decode_unsigned_int(entry)
             elif expected_data_type == DataType.FLOAT:
                 entry.data = unpack('<f', entry.data)[0]
             elif expected_data_type == DataType.STRING:
@@ -336,6 +356,7 @@ class DataType(enum.IntEnum):
     FLOAT = 4
     STRING = 5
     AUTODETECT = 6  # only during encoding
+    UNSIGNED_INTEGER = 7
 
 
 class Entry:
@@ -414,6 +435,15 @@ class Entry:
             remaining_data = encode(self.data, separator_type_id)
         elif data_type == DataType.INTEGER:
             for int_format in ['<b', '<h', '<i', '<q']:
+                try:
+                    remaining_data = pack(int_format, self.data)
+                    break
+                except error:
+                    pass
+            if not remaining_data:
+                raise ValueError('Integer {val} was to big for encoding'.format(val=self.data))
+        elif data_type == DataType.UNSIGNED_INTEGER:
+            for int_format in ['<B', '<H', '<I', '<Q']:
                 try:
                     remaining_data = pack(int_format, self.data)
                     break
