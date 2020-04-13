@@ -16,7 +16,7 @@
 
 __all__ = [
     'TestTLV8', 'TestTLV8Decode', 'TestTLV8Entry', 'TestTLV8Enum', 'TestTLV8EntryList', 'TestTLV8DeepDecode',
-    'TestTLV8DecodeInteger'
+    'TestTLV8DecodeInteger', 'TestTLV8RealWorld', 'TestTLV8ToJson'
 ]
 
 from tests.tlv8_encode_tests import TestTLV8
@@ -26,3 +26,5 @@ from tests.tlv8_entry_tests import TestTLV8Entry
 from tests.tlv8_enum_test import TestTLV8Enum
 from tests.tlv8_entrylist_tests import TestTLV8EntryList
 from tests.tlv8_decode_integer_tests import TestTLV8DecodeInteger
+from tests.tlv8_real_world_test import TestTLV8RealWorld
+from tests.tlv8_to_json_test import TestTLV8ToJson

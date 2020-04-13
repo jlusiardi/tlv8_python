@@ -15,11 +15,12 @@
 #
 
 __all__ = [
-    'encode', 'format_string', 'decode', 'DataType', 'Entry'
+    'encode', 'format_string', 'decode', 'DataType', 'Entry', 'JsonEncoder'
 ]
 
 import enum
 from struct import pack, unpack, error
+import json
 
 try:
     from math import isclose
@@ -179,7 +180,7 @@ def encode(entries: list, separator_type_id=0xff) -> bytes:
     :return: an instance of bytes. if nothing was encoded, it returns an empty instance
     :raises ValueError: if the input parameter is not conform to a list of tlv8.Entry objects
     """
-    if not isinstance(entries, list):
+    if not isinstance(entries, list) and not isinstance(entries, EntryList):
         raise ValueError('The parameter entries must be of type list')
     result = b''
     last_type_id = None
@@ -427,11 +428,17 @@ class Entry:
                 data_type = DataType.INTEGER
             if isinstance(self.data, list):
                 data_type = DataType.TLV8
+            if isinstance(self.data, EntryList):
+                data_type = DataType.TLV8
 
         remaining_data = None
+
+        if isinstance(data_type, enum.EnumMeta):
+            data_type = DataType.INTEGER
+
         if data_type == DataType.BYTES:
             remaining_data = self.data
-        elif data_type == DataType.TLV8:
+        elif data_type == DataType.TLV8 or isinstance(data_type, dict):
             remaining_data = encode(self.data, separator_type_id)
         elif data_type == DataType.INTEGER:
             for int_format in ['<b', '<h', '<i', '<q']:
@@ -489,3 +496,18 @@ class Entry:
             result += str(self.data)
         result += '>,'
         return result
+
+
+class JsonEncoder(json.JSONEncoder):
+    """
+    Subclass to json.JSONEncoder that encodes
+        - tlv8.Entry objects as simple dicts: `{o.type_id: o.data}` and
+        - tlv8.EntryList objects as lists of tlv8.Entry objects instead of a custom class
+    """
+
+    def default(self, o):
+        if isinstance(o, Entry):
+            return {o.type_id: o.data}
+        if isinstance(o, EntryList):
+            return o.data
+        return json.JSONEncoder.default(self, o)

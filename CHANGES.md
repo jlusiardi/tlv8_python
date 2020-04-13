@@ -1,6 +1,16 @@
 
 # Changes
 
+## Version 0.8.0
+
+New Features:
+
+ - `tlv8.encode` can now handle lists of `tlv8.Entry` objects and
+   `tlv8.EntryLists`
+ - adds `tlv8.JsonEncoder` to serialize `tlv8.Entry` and
+   `tlv8.EntryList` objects to json where needed
+
+
 ## Version 0.7.0
 
 New Features:
