@@ -507,7 +507,13 @@ class JsonEncoder(json.JSONEncoder):
 
     def default(self, o):
         if isinstance(o, Entry):
-            return {o.type_id: o.data}
+            key = o.type_id
+            if isinstance(o.type_id, enum.IntEnum):
+                key = str(o.type_id)
+            value = o.data
+            if isinstance(o.data, enum.IntEnum):
+                value = str(o.data)
+            return {key: value}
         if isinstance(o, EntryList):
             return o.data
         return json.JSONEncoder.default(self, o)
