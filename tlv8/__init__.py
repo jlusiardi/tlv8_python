@@ -197,7 +197,7 @@ def encode(entries: list, separator_type_id=0xff) -> bytes:
     return result
 
 
-def _internal_decode(data, strict_mode=False) -> EntryList:
+def _internal_decode(data, expected=None, strict_mode=False) -> EntryList:
     if isinstance(data, bytearray):
         data = bytes(data)
     if not isinstance(data, bytes):
@@ -214,6 +214,8 @@ def _internal_decode(data, strict_mode=False) -> EntryList:
 
         tlv_id = unpack('<B', remaining_data[0:1])[0]
         tlv_len = unpack('<B', remaining_data[1:2])[0]
+        if expected and tlv_id not in expected and tlv_len > 0:
+            break
         if len(remaining_data[2:]) < tlv_len:
             # the remaining data is less than the encoded length
             raise ValueError('Not enough data left. {} vs {}'.format(len(remaining_data[2:]), tlv_len))
@@ -248,7 +250,7 @@ def deep_decode(data, strict_mode=False) -> EntryList:
     :raises: ValueError on failures during decoding
     """
 
-    tmp = _internal_decode(data, strict_mode)
+    tmp = _internal_decode(data, None, strict_mode)
     for entry in tmp:
         try:
             r = deep_decode(entry.data)
@@ -270,7 +272,7 @@ def decode(data, expected=None, strict_mode=False) -> EntryList:
     :return: a list of tlv8.Entry objects
     :raises: ValueError on failures during decoding
     """
-    tmp = _internal_decode(data, strict_mode)
+    tmp = _internal_decode(data, expected, strict_mode)
 
     # if we do not know what is expected, we just return the unfiltered, uninterpreted but parsed list of entries
     if not expected:
