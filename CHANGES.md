@@ -1,6 +1,13 @@
 
 # Changes
 
+## Version 0.9.0
+
+Bug Fix:
+
+- Fix for https://github.com/jlusiardi/tlv8_python/issues/13 (and https://github.com/jlusiardi/homekit_python/issues/194)
+  which broke pairing with BLE devices.
+
 ## Version 0.8.0
 
 New Features:
