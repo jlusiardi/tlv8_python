@@ -31,8 +31,10 @@ jobs:
       - name: run tests
         run: coverage run -m unittest
         
-      - name: run coveralls
-        run: coveralls
+      - name: Publish to coveralls.io
+        uses: coverallsapp/github-action@v1.1.2
+        with:
+          github-token: ${{ github.token }}
         
       - name: run flake8
         run: flake8 tlv8
