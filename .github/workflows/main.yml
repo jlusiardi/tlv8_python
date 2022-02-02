@@ -30,4 +30,10 @@ jobs:
       # Runs a single command using the runners shell
       - name: run tests
         run: coverage run -m unittest
+        
+      - name: run coveralls
+        run: coveralls
+        
+      - name: run flake8
+        run: flake8 tlv8
 
