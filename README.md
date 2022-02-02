@@ -1,4 +1,4 @@
-# Type-Length-Value8 (TLV8) for python [![Build Status](https://travis-ci.org/jlusiardi/tlv8_python.svg?branch=master)](https://travis-ci.org/jlusiardi/tlv8_python) [![Coverage Status](https://coveralls.io/repos/github/jlusiardi/tlv8_python/badge.svg?branch=master)](https://coveralls.io/github/jlusiardi/tlv8_python?branch=master) 
+# Type-Length-Value8 (TLV8) for python [![run tests](https://github.com/jlusiardi/tlv8_python/actions/workflows/main.yml/badge.svg)](https://github.com/jlusiardi/tlv8_python/actions/workflows/main.yml) [![Coverage Status](https://coveralls.io/repos/github/jlusiardi/tlv8_python/badge.svg?branch=master)](https://coveralls.io/github/jlusiardi/tlv8_python?branch=master) 
 
 Type-Length-Value (TLV) are used to encode arbitrary data. In this case the type and length are represented by 1 byte each. Hence the name TLV8.
 
