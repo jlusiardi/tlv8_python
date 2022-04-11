@@ -374,9 +374,9 @@ class Entry:
         :param type_id: the type id of the entry. Must be between 0 and 255 (8-bit type id)
         :param data: the data to be stored in this entry.
         :param data_type: the data type of the entry. Defaults to DataType.AUTODETECT.
-        :param length: if set, this overrides the automatic length detection. This
-            used for integer, when there is special need to set higher byte
-            count than the value would need.
+        :param length: if set, this overrides the automatic length detection.
+            Only applied to integers. Can be used when there is special need
+            to set higher byte count than the value would need.
         :raises: ValueError if the type_id is not within the 8-bit range.
         """
         if type_id < 0 or 255 < type_id:
@@ -434,6 +434,7 @@ class Entry:
                 data_type = DataType.TLV8
 
         remaining_data = None
+        supports_length_overwrite = False
 
         if isinstance(data_type, enum.EnumMeta):
             data_type = DataType.INTEGER
@@ -443,6 +444,7 @@ class Entry:
         elif data_type == DataType.TLV8 or isinstance(data_type, dict):
             remaining_data = encode(self.data, separator_type_id)
         elif data_type == DataType.INTEGER:
+            supports_length_overwrite = True
             for int_format in ['<b', '<h', '<i', '<q']:
                 try:
                     remaining_data = pack(int_format, self.data)
@@ -452,6 +454,7 @@ class Entry:
             if not remaining_data:
                 raise ValueError('Integer {val} was to big for encoding'.format(val=self.data))
         elif data_type == DataType.UNSIGNED_INTEGER:
+            supports_length_overwrite = True
             for int_format in ['<B', '<H', '<I', '<Q']:
                 try:
                     remaining_data = pack(int_format, self.data)
@@ -466,6 +469,9 @@ class Entry:
             remaining_data = self.data.encode()
         if remaining_data is None:
             raise ValueError('Data {val} of type {type} could not be encoded'.format(val=self.data, type=data_type))
+
+        if supports_length_overwrite and (self.length > 0):
+            remaining_data += bytes(self.length - len(remaining_data))
 
         result = pack('<B', self.type_id)
         if len(remaining_data) == 0:
