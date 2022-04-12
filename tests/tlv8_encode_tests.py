@@ -69,6 +69,22 @@ class TestTLV8(unittest.TestCase):
         entry = tlv8.Entry(23, 3.141, tlv8.DataType.FLOAT)
         self.assertEqual(entry.encode(), b'\x17\x04%\x06I@')
 
+    def test_int_auto_length(self):
+        entry = tlv8.Entry(23, 1, tlv8.DataType.INTEGER)
+        self.assertEqual(entry.encode(), b'\x17\x01\x01')
+
+    def test_int_overwrite_length(self):
+        entry = tlv8.Entry(23, 1, tlv8.DataType.INTEGER, length=8)
+        self.assertEqual(entry.encode(), b'\x17\x08\x01\x00\x00\x00\x00\x00\x00\x00')
+
+    def test_unsigned_int_auto_length(self):
+        entry = tlv8.Entry(23, 1, tlv8.DataType.UNSIGNED_INTEGER)
+        self.assertEqual(entry.encode(), b'\x17\x01\x01')
+
+    def test_unsigned_int_overwrite_length(self):
+        entry = tlv8.Entry(23, 1, tlv8.DataType.UNSIGNED_INTEGER, length=8)
+        self.assertEqual(entry.encode(), b'\x17\x08\x01\x00\x00\x00\x00\x00\x00\x00')
+
     def test_encode_different(self):
         data = [
             tlv8.Entry(23, b'23', tlv8.DataType.BYTES),
