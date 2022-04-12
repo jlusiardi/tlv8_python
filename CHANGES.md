@@ -1,6 +1,13 @@
 
 # Changes
 
+## Version 0.10.0
+
+Bug Fix:
+
+- Fix for https://github.com/jlusiardi/tlv8_python/issues/15: consider length 
+  parameter for integer entries during encoding
+
 ## Version 0.9.0
 
 Bug Fix:
