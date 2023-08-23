@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "tlv8-python"
+version = "0.1.0"
+description = ""
+authors = ["Joachim Lusiardi <joachim@lusiardi.de>"]
+readme = "README.md"
+packages = [{include = "tlv8_python"}]
+
+[tool.poetry.dependencies]
+python = "^3.8.1"
+
+
+[tool.poetry.group.dev.dependencies]
+flake8 = "^6.1.0"
+twine = "^4.0.2"
+coveralls = "^3.3.1"
+pytest = "^7.4.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
